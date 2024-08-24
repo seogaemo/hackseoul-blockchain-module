@@ -6,9 +6,6 @@ import * as providers from "src/common/providers";
 import * as modules from "src/modules";
 
 @Module({
-  imports: [
-    ...importToArray(providers),
-    ...importToArray(modules),
-  ],
+  imports: [...importToArray(providers), ...importToArray(modules)],
 })
 export class AppModule {}
