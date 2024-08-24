@@ -1,5 +1,6 @@
-import { Controller } from '@nestjs/common';
-import { BlockchainService } from './blockchain.service';
+import { Controller } from "@nestjs/common";
+
+import { BlockchainService } from "./blockchain.service";
 
 @Controller()
 export class BlockchainController {
