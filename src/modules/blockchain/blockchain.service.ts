@@ -19,6 +19,7 @@ export class BlockchainService {
     "73e4385a2708e6d7048834fbc1079f2fabb17b3c125b146af438971e90716c4d";
 
   private readonly api!: Api;
+  private readonly rpc!: JsonRpc;
 
   constructor(
     private readonly prismaService: PrismaService,
@@ -28,18 +29,43 @@ export class BlockchainService {
       this.configService.get<string>("EOSIO_PRIVATE_KEY")!;
 
     const signatureProvider = new JsSignatureProvider([eosioPrivateKey]);
-    const rpc = new JsonRpc(
+    this.rpc = new JsonRpc(
       this.configService.get<string>("JUNGLE_TESTNET_RPC")!,
       { fetch },
     );
 
     this.api = new Api({
-      rpc,
+      rpc: this.rpc,
       signatureProvider,
       chainId: this.chainId,
       textDecoder: new TextDecoder(),
       textEncoder: new TextEncoder(),
     });
+  }
+
+  public async getTransaction(txId: string) {
+    const url = `https://wax.hyperion.eosrio.io/v2/history/get_transaction?id=${txId}`;
+
+    return fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
+  }
+
+  async getPipelines(prodItemId: string) {
+    return {
+      pipelines: await this.prismaService.pipeline.findMany({
+        where: {
+          productItemId: prodItemId,
+        },
+      }),
+    };
   }
 
   async getProdItem(uid: string) {
@@ -99,6 +125,16 @@ export class BlockchainService {
       },
     )) as any;
 
+    await this.prismaService.prodItem.update({
+      where: {
+        uid: prodItem.uid,
+      },
+      data: {
+        txId: res.transaction_id,
+        blockNum: res.processed.block_num,
+      },
+    });
+
     return prodItem;
   }
 
@@ -142,6 +178,16 @@ export class BlockchainService {
         expireSeconds: 30,
       },
     )) as any;
+
+    await this.prismaService.pipeline.update({
+      where: {
+        uid: pipelineData.uid,
+      },
+      data: {
+        txId: res.transaction_id,
+        blockNum: res.processed.block_num,
+      },
+    });
 
     return pipelineData;
   }

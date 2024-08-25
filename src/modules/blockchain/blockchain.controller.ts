@@ -3,6 +3,7 @@ import {
   BlockchainServiceControllerMethods,
   CreatePipelineRequest,
   CreateProdItemRequest,
+  GetPipelineResponse,
   GetProdItemResponse,
 } from "@shared/generated/blockchain.proto";
 import { Uid } from "@shared/generated/messages/messages.proto";
@@ -16,6 +17,15 @@ import { BlockchainService } from "./blockchain.service";
 @BlockchainServiceControllerMethods()
 export class BlockchainController implements BlockchainServiceController {
   constructor(private readonly blockchainService: BlockchainService) {}
+
+  getPipelines(
+    request: Uid,
+  ):
+    | Promise<GetPipelineResponse>
+    | Observable<GetPipelineResponse>
+    | GetPipelineResponse {
+    return this.blockchainService.getPipelines(request.uid);
+  }
 
   getProdItem(
     request: Uid,
