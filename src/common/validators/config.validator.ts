@@ -6,4 +6,7 @@ export const ConfigValidator = Joi.object({
     .default("production"),
   // DB
   DATABASE_URL: Joi.string().required(),
+  // EOSIO
+  EOSIO_PRIVATE_KEY: Joi.string().required(),
+  JUNGLE_TESTNET_RPC: Joi.string().required(),
 });
